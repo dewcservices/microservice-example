@@ -1,0 +1,110 @@
+version: "3.3"
+
+services:  
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+    #   # as the docker-compose-base.yml is called from .devcontainer docker appends devcontainer_ to the dataservice network name
+      - dev
+    ports:
+     # expose port to be available via ednpasxxxx
+     # note: localhost:8080 is forwarded within devcontainer.json for convenience
+     - "8020:8080"
+    # volume for workspace defined in devcontainer.json
+    volumes:
+      # Use a named volume for the source code
+      - ..:/workspace
+      # Persist VS Code extensions between rebuilds
+      - vscode-extensions:/root/.vscode-server/extensions
+    command: sleep infinity
+
+  db:
+    container_name: postgresdb
+    image: postgres:latest
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      # NOTE: POSTGRES_DB/USER/PASSWORD should match values in app container
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+    networks:
+      - dev
+  
+  akhq:
+    container_name: akhq
+    image: tchiotludo/akhq
+    environment:
+      AKHQ_CONFIGURATION: |
+        akhq:
+          connections:
+            docker-kafka-server:
+              properties:
+                bootstrap.servers: "kafka:9092"
+    ports:
+      - 9080:8080
+    links:
+      - kafka
+    networks:
+      - dev
+
+  zookeeper:
+    container_name: zookeeper
+    image: confluentinc/cp-zookeeper
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data:Z
+      - zookeeper-log:/var/lib/zookeeper/log:Z
+    environment:
+      ZOOKEEPER_CLIENT_PORT: '2181'
+      ZOOKEEPER_ADMIN_ENABLE_SERVER: 'false'
+    networks:
+      - dev
+
+  kafka:
+    container_name: kafka
+    image: confluentinc/cp-kafka
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    volumes:
+      - kafka-data:/var/lib/kafka/data:Z
+    environment:
+        KAFKA_ADVERTISED_LISTENERS: CLIENT://kafka:9092,EXTERNAL://localhost:9093
+        KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+        KAFKA_INTER_BROKER_LISTENER_NAME: CLIENT
+        KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+        KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+        KAFKA_BROKER_ID: 1
+    links:
+      - zookeeper
+    networks:
+      - dev
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    restart: always
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: azureuser@dewc.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+volumes:
+  vscode-extensions:
+  postgres-data:
+  zookeeper-data:
+  zookeeper-log:
+  kafka-data:
+  pgadmin-data:
+   
+# Create a new network for the purpose of assigning a static IP for a service
+# This docker network will be destroyed when docker-compose down is called.
+networks:
+  dev:
+    driver: bridge
