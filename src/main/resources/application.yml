@@ -1,18 +1,7 @@
 spring:
-  datasource:
-    url: jdbc:postgresql://db:5432/postgres
-    username: postgres
-    password: postgres
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        temp:
-          use_jdbc_metadata_defaults: false
-    show-sql: true
-    hibernate:
-      ddl-auto: create
+  data:
+    mongodb:
+      uri: mongodb://<username>:<password>@localhost:27017/<dbname>
   kafka:
     bootstrap-servers: kafka:9092
     producer:
