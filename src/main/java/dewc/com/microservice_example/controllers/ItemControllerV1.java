@@ -1,54 +1,61 @@
 package dewc.com.microservice_example.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import dewc.com.microservice_example.adapters.ItemAdapter;
+import dewc.com.microservice_example.controllers.dtos.ItemDTO;
+import dewc.com.microservice_example.services.interfaces.IItemService;
+
 import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/items")
 public class ItemControllerV1 {
 
- private final ItemService itemService;
+ private final IItemService itemService;
 
     @Autowired
-    public ItemController(ItemService itemService) {
+    public ItemControllerV1(@Qualifier("itemService") IItemService itemService) {
         this.itemService = itemService;
     }
 
     @GetMapping
-    public List<ItemDtoV1> getAllItems() {
-        return itemService.getAllItems();
+    public ResponseEntity<List<ItemDTO>> getAllItems() {
+        var itemDTOs = itemService.getAllItems().stream()
+                    .map(ItemAdapter::toDTO)
+                    .collect(Collectors.toList());
+        return ResponseEntity.ok(itemDTOs);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ItemDtoV1> getItemById(@PathVariable String id) {
+    public ResponseEntity<ItemDTO> getItemById(@PathVariable String id) {
         return itemService.getItemById(id)
-                .map(item -> new ItemDtoV1(item.getId(), item.getLabel(), item.getDescription()))
+                .map(ItemAdapter::toDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<ItemDtoV1> createItem(@RequestBody ItemDtoV1 itemDTO) {
-        Item item = new Item(); // convert from ItemDTO to Item entity
-        // Set properties from DTO to entity
-        item.setLabel(itemDTO.getLabel());
-        item.setDescription(itemDTO.getDescription());
-        
-        Item createdItem = itemService.createOrUpdateItem(item);
-        return itemService.createOrUpdateItem(item);
+    public ResponseEntity<ItemDTO> createItem(@Valid @RequestBody ItemDTO itemDTO) {
+        // you could return created with a location of the resource in the header
+        return ResponseEntity.ok(createOrUpdateItem(itemDTO));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ItemDtoV1> updateItem(@PathVariable String id, @RequestBody ItemDtoV1 itemDTO) {
-        Item item = new Item(); // convert from ItemDTO to Item entity
-        // Set properties from DTO to entity
-        item.setId(id);
-        item.setLabel(itemDTO.getLabel());
-        item.setDescription(itemDTO.getDescription());
-        return itemService.createOrUpdateItem(item);
+    public ResponseEntity<ItemDTO> updateItem(@PathVariable String id, @Valid  @RequestBody ItemDTO itemDTO) {
+        itemDTO.setId(id);
+        return ResponseEntity.ok(createOrUpdateItem(itemDTO));
+    }
+
+    private ItemDTO createOrUpdateItem(ItemDTO itemDTO){
+        var item = itemService.createOrUpdateItem(ItemAdapter.toEntity(itemDTO));
+        return ItemAdapter.toDTO(item);
     }
 
     @DeleteMapping("/{id}")

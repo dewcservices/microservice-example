@@ -1,20 +1,25 @@
 package dewc.com.microservice_example.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
-package dewc.com.microservice_example.services.interfaces;
+import org.springframework.dao.DuplicateKeyException;
+import dewc.com.microservice_example.repositories.ItemRepository;
+import dewc.com.microservice_example.repositories.ItemRepositoryMock;
+import dewc.com.microservice_example.repositories.entities.Item;
+import dewc.com.microservice_example.services.interfaces.IItemService;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ItemServiceV1 {
+@Qualifier("itemService")
+public class ItemService implements IItemService {
     
     private final ItemRepository itemRepository;
 
     @Autowired
-    public ItemService(ItemRepository itemRepository) {
+    public ItemService(ItemRepositoryMock itemRepository) {
         this.itemRepository = itemRepository;
     }
 

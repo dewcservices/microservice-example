@@ -1,43 +1,60 @@
 package dewc.com.microservice_example.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import dewc.com.microservice_example.adapters.ItemAdapter;
+import dewc.com.microservice_example.controllers.dtos.ItemCreateDTO;
+import dewc.com.microservice_example.controllers.dtos.ItemDTO;
+import dewc.com.microservice_example.services.interfaces.IItemService;
+
 import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v2/items")
-public class ItemControllerV2 {
+public class ItemControllerV2{
 
-    private final ItemService itemService;
+    private final IItemService itemService;
 
     @Autowired
-    public ItemController(ItemService itemService) {
+    public ItemControllerV2(@Qualifier("itemService") IItemService itemService) {
         this.itemService = itemService;
     }
 
+    // You could make a choice to leave this on api/v1
     @GetMapping
-    public List<ItemDtoV2> getAllItems() {
-        return itemService.getAllItems();
+    public ResponseEntity<List<ItemDTO>> getAllItems() {
+                var itemDTOs = itemService.getAllItems().stream()
+                    .map(ItemAdapter::toDTO)
+                    .collect(Collectors.toList());
+        return ResponseEntity.ok(itemDTOs);
     }
 
+    // You could make a choice to leave this on api/v1
     @GetMapping("/{id}")
-    public ResponseEntity<ItemDtoV2> getItemById(@PathVariable String id) {
+    public ResponseEntity<ItemDTO> getItemById(@PathVariable String id) {
         return itemService.getItemById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        .map(ItemAdapter::toDTO)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<ItemDtoV2> createItem(@RequestBody Item item) {
-        return itemService.createOrUpdateItem(item);
+    public ResponseEntity<ItemDTO> createItem(@Valid @RequestBody ItemCreateDTO itemDTO) {
+        var item = itemService.createOrUpdateItem(ItemAdapter.toEntity(itemDTO));
+        return ResponseEntity.ok(ItemAdapter.toDTO(item));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ItemDtoV2> updateItem(@PathVariable String id, @RequestBody ItemDtoV2 item) {
-        item.setId(id);
-        return itemService.createOrUpdateItem(item);
+    public ResponseEntity<ItemDTO> updateItem(@PathVariable String id, @RequestBody ItemDTO itemDTO) {
+        itemDTO.setId(id);
+        var item = itemService.createOrUpdateItem(ItemAdapter.toEntity(itemDTO));
+        return ResponseEntity.ok(ItemAdapter.toDTO(item));
     }
 
     @DeleteMapping("/{id}")

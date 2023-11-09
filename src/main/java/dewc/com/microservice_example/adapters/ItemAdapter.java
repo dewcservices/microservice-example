@@ -1,5 +1,14 @@
 package dewc.com.microservice_example.adapters;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import dewc.com.microservice_example.controllers.dtos.ItemCreateDTO;
+import dewc.com.microservice_example.controllers.dtos.ItemDTO;
+import dewc.com.microservice_example.repositories.entities.Item;
+
+
 public class ItemAdapter {
 
     public static ItemDTO toDTO(Item item) {
@@ -15,6 +24,16 @@ public class ItemAdapter {
         }
         Item item = new Item();
         item.setId(itemDTO.getId()); // Be cautious with setting ID when converting to entity for create operations
+        item.setLabel(itemDTO.getLabel());
+        item.setDescription(itemDTO.getDescription());
+        return item;
+    }
+
+        public static Item toEntity(ItemCreateDTO itemDTO) {
+        if (itemDTO == null) {
+            return null;
+        }
+        Item item = new Item();
         item.setLabel(itemDTO.getLabel());
         item.setDescription(itemDTO.getDescription());
         return item;

@@ -1,6 +1,11 @@
 package dewc.com.microservice_example.services.interfaces;
 
-public class IItemService {
+import java.util.List;
+import java.util.Optional;
+
+import dewc.com.microservice_example.repositories.entities.Item;
+
+public interface IItemService {
     
     public List<Item> getAllItems();
 

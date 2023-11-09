@@ -1,9 +1,16 @@
-package dewc.com.microservice_example.repositorities.entities;
+package dewc.com.microservice_example.repositories.entities;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+// import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "item")
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+// @Document(collection = "item")
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 public class Item {
     @Id
     private String id;
