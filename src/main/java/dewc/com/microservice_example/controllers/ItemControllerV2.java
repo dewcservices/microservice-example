@@ -21,7 +21,6 @@ public class ItemControllerV2{
 
     private final IItemService itemService;
 
-    @Autowired
     public ItemControllerV2(@Qualifier("itemService") IItemService itemService) {
         this.itemService = itemService;
     }

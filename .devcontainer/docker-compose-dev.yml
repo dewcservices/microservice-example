@@ -33,6 +33,20 @@ services:
       POSTGRES_DB: postgres
     networks:
       - dev
+
+  mongodb:
+    image: mongo:4.4.6
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: mongo
+      MONGO_INITDB_DATABASE: db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data_container:/data/db
+    networks:
+      - dev
   
   akhq:
     container_name: akhq
@@ -102,6 +116,7 @@ volumes:
   zookeeper-log:
   kafka-data:
   pgadmin-data:
+  mongodb_data_container:
    
 # Create a new network for the purpose of assigning a static IP for a service
 # This docker network will be destroyed when docker-compose down is called.

@@ -20,7 +20,6 @@ public class ItemControllerV1 {
 
  private final IItemService itemService;
 
-    @Autowired
     public ItemControllerV1(@Qualifier("itemService") IItemService itemService) {
         this.itemService = itemService;
     }

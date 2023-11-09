@@ -1,7 +1,15 @@
 spring:
   data:
     mongodb:
-      uri: mongodb://<username>:<password>@localhost:27017/<dbname>
+      host: mongodb
+      port: 27017
+      database: db
+      username: mongo
+      password: mongo
+      authentication-database: admin
+    # mongodb:
+    #   uri: mongodb://mongo:mongo@mongodb:27017/db
+#     uri: mongodb://<username>:<password>@localhost:27017/<dbname>      
   kafka:
     bootstrap-servers: kafka:9092
     producer:
@@ -13,6 +21,20 @@ spring:
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  datasource:
+    url: jdbc:postgresql://db:5432/postgres
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        temp:
+          use_jdbc_metadata_defaults: false
+    show-sql: true
+    hibernate:
+      ddl-auto: create
 
 springdoc:
   swagger-ui.path: /swagger-ui.html

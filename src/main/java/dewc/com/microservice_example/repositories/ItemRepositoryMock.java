@@ -9,10 +9,10 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import dewc.com.microservice_example.repositories.entities.Item;
+import dewc.com.microservice_example.repositories.interfaces.IItemRepository;
 
 @Service
-public class ItemRepositoryMock implements ItemRepository {
-
+public class ItemRepositoryMock implements IItemRepository<Item, String> {
 
   private Map<String, Item> mockRepo;
   public ItemRepositoryMock(){
